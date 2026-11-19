@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F5F0E4">
+<meta name="author" content="陈珊珊，中国矿业大学 / 中科院生态环境研究所">
+<meta name="description" content="情绪的自然处方：根据位置、情绪状态与自然偏好推荐最近的自然场景。陈珊珊开发。">
+<title>情绪的自然处方 · 移动端预览</title>
+<link rel="preconnect" href="https://miaoda.feishu.cn">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F6F1E5;--paper-2:#FCF9F1;--paper-3:#EDE6D7;
+  --ink:#20271F;--ink-2:#4E544A;--muted:#7C7B6C;
+  --line:rgba(32,39,31,.14);--line-2:rgba(32,39,31,.08);
+  --green:#2C4839;--green-2:#3D604D;--wine:#7A202C;--ochre:#A66B36;
+  --serif:"Noto Serif SC","Songti SC","STSong",serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{background:#DED6C5;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(900px 600px at 20% 0%,rgba(255,255,255,.5),transparent 60%),radial-gradient(700px 500px at 100% 100%,rgba(44,72,57,.12),transparent 60%);}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+a{color:inherit}
+
+/* 桌面预览舞台 */
+.stage{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:92px;padding:28px 40px}
+.stage-copy{width:330px;flex:none}
+.stage-copy .eyebrow{font-size:10px;letter-spacing:.24em;color:var(--wine);text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.stage-copy .eyebrow i{width:28px;height:1px;background:var(--wine);display:block}
+.stage-copy h1{font-family:var(--serif);font-size:46px;line-height:1.22;font-weight:600;margin:0 0 18px;letter-spacing:-.01em}
+.stage-copy h1 span{color:var(--wine)}
+.stage-copy .desc{font-size:13px;line-height:1.95;color:var(--ink-2);font-weight:300;margin:0 0 30px;max-width:300px}
+.steps{list-style:none;padding:0;margin:0 0 30px;border-top:1px solid var(--line)}
+.steps li{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-2);line-height:1.6}
+.steps b{font-family:var(--serif);color:var(--wine);font-weight:500;font-size:11px;letter-spacing:.08em;min-width:22px;padding-top:1px}
+.stage-meta{font-size:10px;letter-spacing:.08em;color:var(--muted);display:flex;justify-content:space-between}
+.stage-credit{font-size:9.5px;line-height:1.7;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:14px}
+.stage-credit b{color:var(--ink-2);font-weight:500}
+
+/* 手机壳 */
+.phone{width:412px;height:868px;flex:none;background:#151815;border-radius:56px;padding:12px;box-shadow:0 50px 90px -40px rgba(23,25,20,.65),0 0 0 1px rgba(255,255,255,.1) inset}
+.screen{position:relative;width:100%;height:100%;background:var(--paper);border-radius:46px;overflow:hidden;display:flex;flex-direction:column}
+.island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:96px;height:24px;border-radius:20px;background:#121512;z-index:20}
+.status{height:46px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 8px;font-size:11.5px;font-weight:500;letter-spacing:.02em;color:var(--ink);position:relative;z-index:2}
+.status .icons{display:flex;align-items:center;gap:5px}
+.status svg{display:block}
+
+/* App 头部 */
+.appbar{flex:none;display:flex;align-items:center;justify-content:space-between;padding:4px 20px 8px;position:relative;z-index:7;background:var(--paper)}
+.iconbtn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s;position:relative}
+.iconbtn:active{background:rgba(32,39,31,.08)}
+.iconbtn.hidden{visibility:hidden;pointer-events:none}
+.app-title{position:absolute;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none}
+.app-title b{font-family:var(--serif);font-size:15px;letter-spacing:.05em;font-weight:600}
+.app-title span{font-size:7.5px;letter-spacing:.25em;color:var(--muted);text-transform:uppercase}
+.fav-btn{font-size:10px;color:var(--wine);display:flex;align-items:center;gap:3px;font-weight:500}
+.progress{flex:none;display:flex;gap:4px;padding:0 20px 2px;background:var(--paper);position:relative;z-index:7}
+.progress i{height:2px;flex:1;background:rgba(32,39,31,.12);border-radius:2px;transition:background .3s}
+.progress i.on{background:var(--green)}
+
+/* 视图 */
+.view{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 20px 18px;scrollbar-width:none;position:relative}
+.view::-webkit-scrollbar{display:none}
+.kicker{display:flex;align-items:center;gap:8px;font-size:9.5px;letter-spacing:.18em;color:var(--wine);text-transform:uppercase;margin:0 0 12px;font-weight:500}
+.kicker:before{content:"";width:18px;height:1px;background:var(--wine)}
+h2{font-family:var(--serif);font-size:29px;line-height:1.32;font-weight:600;margin:0 0 8px;letter-spacing:-.01em}
+.sub{font-size:11.5px;line-height:1.75;color:var(--muted);font-weight:300;margin:0 0 14px}
+
+/* 定位卡 */
+.loc-card{position:relative;height:158px;border-radius:20px;overflow:hidden;background:var(--green);color:#F1EBDD;padding:18px;margin-bottom:18px;box-shadow:0 18px 32px -26px rgba(20,35,27,.8)}
+.loc-map{position:absolute;inset:0;width:100%;height:100%;opacity:.55;pointer-events:none}
+.loc-content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column}
+.loc-top{display:flex;align-items:center;gap:7px;font-size:9.5px;letter-spacing:.14em;color:rgba(241,235,221,.7);text-transform:uppercase}
+.loc-dot{width:6px;height:6px;border-radius:50%;background:#E7C9A4;box-shadow:0 0 0 4px rgba(231,201,164,.15)}
+.loc-city{font-family:var(--serif);font-size:28px;font-weight:600;margin:12px 0 2px;letter-spacing:.03em}
+.loc-note{font-size:10.5px;color:rgba(241,235,221,.7);line-height:1.6}
+.loc-btn{margin-top:auto;align-self:flex-start;background:#F6F1E5;color:var(--green);border-radius:999px;padding:9px 14px;font-size:11px;display:flex;align-items:center;gap:7px;font-weight:500}
+.loc-btn:active{transform:scale(.98)}
+.loc-btn svg{width:14px;height:14px}
+
+.divider{display:flex;align-items:center;gap:10px;margin:6px 0 12px;font-size:9.5px;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
+.divider:before,.divider:after{content:"";height:1px;background:var(--line);flex:1}
+
+.city-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:16px}
+.city{border:1px solid var(--line);border-radius:12px;padding:9px 4px 8px;background:rgba(252,249,241,.5);transition:.18s;text-align:center}
+.city b{display:block;font-size:12px;font-weight:500;letter-spacing:.02em;white-space:nowrap}
+.city span{display:block;font-size:8px;color:var(--muted);margin-top:3px;letter-spacing:.02em}
+.city.soon{border-style:dashed;opacity:.6;pointer-events:none}
+.city.on{background:var(--green);border-color:var(--green);color:#F6F1E5}
+.city.on span{color:rgba(246,241,229,.66)}
+.privacy{font-size:9.5px;line-height:1.7;color:var(--muted);display:flex;gap:7px;align-items:flex-start;margin:2px 0 0}
+.credit{font-size:8.8px;line-height:1.6;color:var(--muted);border-top:1px solid var(--line-2);margin:12px 0 0;padding-top:8px;letter-spacing:.02em}
+.credit span{color:var(--wine);margin-right:7px;letter-spacing:.08em}
+.privacy svg{width:12px;height:12px;flex:none;margin-top:1px;opacity:.7}
+
+/* 选择控件 */
+.field{margin-bottom:13px}
+.field-label{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px}
+.field-label b{font-family:var(--serif);font-size:13.5px;letter-spacing:.03em;font-weight:600}
+.field-label span{font-size:8.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.field-label em{font-style:normal;font-size:9.5px;color:var(--muted)}
+.moods{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mood{border:1px solid var(--line);border-radius:14px;background:rgba(252,249,241,.55);padding:10px 12px 9px;text-align:left;transition:.2s;display:flex;flex-direction:column;gap:4px}
+.mood svg{width:19px;height:19px;stroke:var(--green);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.mood b{font-size:13.5px;font-weight:500;display:block}
+.mood span{font-size:9px;color:var(--muted);font-weight:300;display:block;margin-top:1px}
+.mood.on{background:var(--green);border-color:var(--green);color:#F7F2E7}
+.mood.on svg{stroke:#E9D4AE}
+.mood.on span{color:rgba(247,242,231,.68)}
+.pills{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.pill{border:1px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center;background:rgba(252,249,241,.5);transition:.2s}
+.pill b{font-size:12px;font-weight:500;display:block}
+.pill span{font-size:8.5px;color:var(--muted);display:block;margin-top:2px}
+.pill.on{background:var(--green);border-color:var(--green);color:#F6F1E5}
+.pill.on span{color:rgba(246,241,229,.62)}
+.senses{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.sense{border:1px solid var(--line);border-radius:12px;padding:7px 2px 6px;text-align:center;background:rgba(252,249,241,.5);transition:.2s}
+.sense svg{width:16px;height:16px;margin:0 auto 4px;display:block;stroke:var(--green);fill:none;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}
+.sense b{font-size:11.5px;font-weight:500;display:block}
+.sense span{font-size:8px;color:var(--muted);display:block;margin-top:2px}
+.sense.on{background:var(--green);border-color:var(--green);color:#F7F2E7}
+.sense.on svg{stroke:#E9D4AE}
+.sense.on span{color:rgba(247,242,231,.66)}
+
+/* 结果 */
+.res-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px}
+.res-head h2{font-size:26px;margin:0}
+.res-count{font-size:9px;color:var(--muted);text-align:right;line-height:1.6}
+.res-count .scrollhint{font-size:8px;letter-spacing:0;color:var(--muted)}
+.reason{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 12px}
+.fallback{font-size:9px;line-height:1.6;color:var(--ochre);margin:-4px 0 10px}
+.reason span{font-size:8.5px;border:1px solid rgba(122,32,44,.25);color:var(--wine);padding:3px 7px;border-radius:999px;white-space:nowrap}
+.rx{background:var(--paper-2);border:1px solid var(--line);border-radius:20px;padding:16px 16px 14px;position:relative;box-shadow:0 20px 40px -34px rgba(32,39,31,.55);margin-bottom:14px}
+.rx:before{content:"";position:absolute;left:12px;right:12px;top:8px;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+.rx-top{display:flex;justify-content:space-between;align-items:center;font-size:8px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+.rx-top b{color:var(--wine);font-weight:500}
+.heart{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(122,32,44,.06)}
+.heart svg{width:15px;height:15px;stroke:var(--wine);fill:none;stroke-width:1.4}
+.heart.on svg{fill:var(--wine)}
+.rx-city{display:flex;align-items:baseline;gap:8px;margin-bottom:2px}
+.rx-city h3{font-family:var(--serif);font-size:27px;margin:0;font-weight:600;letter-spacing:.03em}
+.rx-city em{font-style:normal;font-size:8.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.rx-place{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--wine);margin:0 0 10px}
+.rx-place svg{width:12px;height:12px;flex:none}
+.distrow{display:flex;align-items:center;gap:8px;padding:7px 0 9px;border-bottom:1px solid var(--line-2);margin-bottom:11px}
+.distrow b{font-family:var(--serif);font-size:15px;font-weight:600}
+.distrow span{font-size:9.5px;color:var(--muted)}
+.distrow i{font-style:normal;margin-left:auto;font-size:9px;color:var(--green);background:rgba(44,72,57,.07);padding:4px 8px;border-radius:999px}
+.rx-body{font-family:var(--serif);font-size:18px;line-height:1.65;font-weight:500;margin:0 0 10px;text-wrap:pretty}
+.rows{border-top:1px solid var(--line-2)}
+.row{display:grid;grid-template-columns:48px 1fr;gap:8px;padding:7px 0;border-bottom:1px solid var(--line-2);font-size:10.5px;line-height:1.65}
+.row span{font-size:8px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;padding-top:2px}
+.row p{margin:0;color:var(--ink-2);font-weight:300}
+.route{margin:4px 0 8px}
+.route svg{width:100%;height:46px;display:block}
+.route-cap{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);letter-spacing:.04em}
+.evidence{font-size:8.6px;line-height:1.55;color:var(--green);background:rgba(44,72,57,.06);border-radius:8px;padding:7px 8px;margin:8px 0 0}
+.evidence b{font-weight:500}
+
+.alt-title{font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:16px 0 8px;display:flex;justify-content:space-between;align-items:center}
+.alt-title span{letter-spacing:0;text-transform:none;font-size:9px;color:var(--wine)}
+.alt{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:7px;text-align:left;background:rgba(252,249,241,.55)}
+.alt:active{background:var(--paper-3)}
+.alt-idx{font-family:var(--serif);font-size:9px;color:var(--wine);width:16px;flex:none}
+.alt-main{flex:1;min-width:0}
+.alt-main b{display:block;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alt-main span{display:block;font-size:8.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alt-km{font-size:9.5px;color:var(--green);white-space:nowrap}
+.alt svg{width:12px;height:12px;flex:none;opacity:.4}
+
+/* 底部 CTA */
+.cta-wrap{flex:none;padding:10px 20px 12px;background:linear-gradient(180deg,rgba(246,241,229,0),rgba(246,241,229,.94) 32%);position:relative;z-index:6}
+.cta{width:100%;height:48px;border-radius:999px;background:var(--wine);color:#FAF4E8;font-size:13.5px;font-weight:500;letter-spacing:.04em;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;box-shadow:0 12px 24px -16px rgba(122,32,44,.8)}
+.cta:active{transform:scale(.99);background:#651A24}
+.cta:disabled{background:rgba(32,39,31,.16);color:rgba(32,39,31,.4);box-shadow:none}
+.cta svg{width:15px;height:15px}
+.cta-sub{text-align:center;font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:.02em}
+.homebar{flex:none;height:16px;display:flex;align-items:center;justify-content:center}
+.homebar i{width:120px;height:4px;border-radius:4px;background:rgba(32,39,31,.28);display:block}
+
+/* 底部弹层 */
+.sheet{position:absolute;inset:0;z-index:30;display:none}
+.sheet.on{display:block}
+.sheet-bg{position:absolute;inset:0;background:rgba(20,25,19,.42);backdrop-filter:blur(2px)}
+.sheet-panel{position:absolute;left:0;right:0;bottom:0;background:var(--paper-2);border-radius:26px 26px 0 0;padding:10px 20px 22px;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+.sheet.on .sheet-panel{transform:none}
+.sheet-bar{width:42px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 14px}
+.sheet-panel h3{font-family:var(--serif);font-size:21px;margin:0 0 4px;font-weight:600}
+.sheet-panel .addr{font-size:10px;color:var(--muted);margin:0 0 14px}
+.route-steps{list-style:none;margin:0 0 16px;padding:0;border-top:1px solid var(--line-2)}
+.route-steps li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-2);font-size:10.5px;line-height:1.6;color:var(--ink-2)}
+.route-steps b{font-family:var(--serif);font-size:9px;color:var(--wine);min-width:14px;font-weight:500}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn2{border:1px solid var(--line);border-radius:999px;height:42px;font-size:11.5px;display:flex;align-items:center;justify-content:center;text-decoration:none;background:transparent;color:var(--ink)}
+.btn2.solid{background:var(--green);border-color:var(--green);color:#F6F1E5}
+.sheet-note{font-size:8.5px;color:var(--muted);line-height:1.6;margin:10px 0 0;text-align:center}
+
+.toast{position:absolute;left:50%;bottom:110px;transform:translate(-50%,10px);background:rgba(25,31,24,.9);color:#F6F1E5;font-size:10.5px;padding:9px 14px;border-radius:999px;opacity:0;transition:.25s;pointer-events:none;z-index:40;white-space:nowrap;max-width:88%;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+
+/* 中等宽度隐藏说明栏 */
+@media (max-width:1000px) and (min-width:721px){.stage-copy{display:none}}
+
+/* 移动端全屏 */
+@media (max-width:720px), (pointer:coarse) and (max-width:900px){
+  body{background:var(--paper);background-image:none}
+  .stage{padding:0;gap:0;display:block;min-height:100dvh}
+  .stage-copy{display:none}
+  .phone{width:100%;height:100dvh;border-radius:0;padding:0;box-shadow:none;background:var(--paper)}
+  .screen{border-radius:0;height:100dvh}
+  .island,.status{display:none}
+  .appbar{padding-top:calc(10px + env(safe-area-inset-top))}
+  .homebar{height:calc(14px + env(safe-area-inset-bottom))}
+
+  .view{padding-left:22px;padding-right:22px}
+}
+@media (max-height:760px) and (min-width:721px){
+  .stage{padding:12px}
+  .phone{height:740px;width:352px;border-radius:48px}
+  .screen{border-radius:38px}
+}
+</style>
+</head>
+<body>
+
+<main class="stage">
+  <section class="stage-copy">
+    <div class="eyebrow"><i></i>Mobile App Preview</div>
+    <h1>情绪的<br><span>自然处方</span></h1>
+    <p class="desc">把“城市自然—情绪”的论文证据，变成一个随身的处方工具：先定位，再说此刻的感受，最后得到离你最近的一处自然。</p>
+    <ul class="steps">
+      <li><b>01</b><span>定位或选择你所在的城市</span></li>
+      <li><b>02</b><span>选择情绪状态、可用时长与感官偏好</span></li>
+      <li><b>03</b><span>按匹配度与距离，推荐最近的自然处方</span></li>
+    </ul>
+    <div class="stage-meta"><span>390 × 844</span><span>Interactive prototype</span></div>
+    <p class="stage-credit">开发与来源｜中国矿业大学 / 中科院生态环境研究所<br>陈珊珊</p>
+  </section>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="status">
+        <span>9:41</span>
+        <span class="icons">
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M1 8.5v2M4 6.5v4M7 4.5v6M10 2.5v8M13 .5v10" stroke="#20271F" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <svg width="14" height="11" viewBox="0 0 14 11" fill="none"><path d="M1 4c1.8-1.6 3.8-2.4 6-2.4S11.2 2.4 13 4M3.6 6.4C4.8 5.4 6.3 4.9 7 4.9s2.2.5 3.4 1.5M7 8.6v1.2" stroke="#20271F" stroke-width="1.1" stroke-linecap="round"/></svg>
+          <svg width="19" height="10" viewBox="0 0 19 10" fill="none"><rect x=".6" y=".6" width="15" height="8.8" rx="2.2" stroke="#20271F" stroke-opacity=".55" stroke-width="1"/><rect x="2.3" y="2.3" width="11.6" height="5.4" rx="1" fill="#20271F"/><path d="M17 3.6v2.8" stroke="#20271F" stroke-opacity=".5" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </span>
+      </div>
+
+      <header class="appbar">
+        <button class="iconbtn hidden" id="backBtn" aria-label="返回">
+          <svg width="19" height="19" viewBox="0 0 20 20" fill="none"><path d="M12 4 6 10l6 6" stroke="#20271F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="app-title"><b>情绪的自然处方</b><span>Nature Rx</span></div>
+        <button class="iconbtn fav-btn" id="favTop" aria-label="收藏">
+          <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><path d="M10 16.5S3 12.4 3 7.8C3 5.5 4.7 4 6.6 4c1.4 0 2.7.7 3.4 1.8C10.7 4.7 12 4 13.4 4 15.3 4 17 5.5 17 7.8c0 4.6-7 8.7-7 8.7Z" stroke="#7A202C" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <span id="favCount">0</span>
+        </button>
+      </header>
+
+      <div class="progress" id="progress"><i class="on"></i><i></i><i></i></div>
+      <main class="view" id="view"></main>
+      <div class="cta-wrap" id="cta"></div>
+      <div class="homebar"><i></i></div>
+
+      <div class="sheet" id="sheet">
+        <div class="sheet-bg" data-close-sheet></div>
+        <div class="sheet-panel">
+          <div class="sheet-bar"></div>
+          <h3>去这里的路线</h3>
+          <p class="addr" id="sheetAddr"></p>
+          <ol class="route-steps" id="sheetSteps"></ol>
+          <div class="sheet-actions">
+            <button class="btn2" data-close-sheet>留在预览</button>
+            <a class="btn2 solid" id="mapLink" target="_blank" rel="noopener">在地图中打开</a>
+          </div>
+          <p class="sheet-note">路线为示意；实际导航以地图应用为准。</p>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ============================================================
+   场景库：城市、坐标、情绪标签、时长、感官、同行者、文献线索
+   ============================================================ */
+const CITIES = [
+  {name:'上海',lat:31.230,lon:121.474},
+  {name:'北京',lat:39.904,lon:116.407},
+  {name:'南京',lat:32.060,lon:118.796},
+  {name:'杭州',lat:30.274,lon:120.155},
+  {name:'福州',lat:26.074,lon:119.296},
+  {name:'武汉',lat:30.593,lon:114.305},
+  {name:'厦门',lat:24.479,lon:118.089},
+  {name:'西安',lat:34.341,lon:108.940},
+  {name:'成都',lat:30.572,lon:104.066},
+  {name:'长春',lat:43.817,lon:125.323},
+  {name:'柏林',lat:52.520,lon:13.405},
+  {name:'爱丁堡',lat:55.953,lon:-3.188},
+  {name:'波尔图',lat:41.158,lon:-8.629}
+];
+
+const PLACES = [
+ {id:'sh-xuhui',city:'上海',name:'徐汇滨江绿道',lat:31.185,lon:121.455,moods:['tense','tired'],times:[30,60],senses:['water','shade'],companions:['solo'],body:'沿江走 20 分钟，再找一段树荫坐下，把手机收起来。',why:'连续绿廊与水景，把“赶路”切成“过渡”。',how:'提前一站下车，从江边走到下一座桥，再折返。',when:'工作日晚间，天还没完全黑的时候。',ev:'上海 7 篇：滨水绿地的水景与绿廊与减压、放松正相关。',tags:['水声','树荫','通勤可及']},
+ {id:'sh-century',city:'上海',name:'世纪公园',lat:31.218,lon:121.548,moods:['low','tired'],times:[60],senses:['open','shade'],companions:['family','elder'],body:'从 7 号门进，找一片有树荫的草地，铺一张垫子。',why:'开阔草坪、林荫道与完整设施，降低“带娃出门”的决策成本。',how:'推车走湖边缓坡，孩子跑，大人坐着看。',when:'周末上午，光线柔和的时候。',ev:'上海 7 篇：滨水绿地的水景、花丛与绿廊与减压、放松正相关。',tags:['草地','推车友好','设施完整']},
+ {id:'sh-jingan',city:'上海',name:'静安公园林荫道',lat:31.223,lon:121.449,moods:['tired','low'],times:[10,30],senses:['shade'],companions:['elder','solo'],body:'找一条悬铃木林荫道，慢走 15 分钟，中途坐两次。',why:'冠层密度对生理与心理福祉关键，树荫比“风景”更实用。',how:'挑一条有连续树冠的路，不设目的地。',when:'上午 9 点前，人少、光柔。',ev:'上海 7 篇：悬铃木/银杏冠层密度影响老年人生理与心理福祉（HRV）。',tags:['树荫','长椅','低强度']},
+ {id:'bj-aosen',city:'北京',name:'奥森南园',lat:40.017,lon:116.390,moods:['restless','tense'],times:[30,60],senses:['open'],companions:['solo','family'],body:'从南门进，沿湖走 2 公里，不走岔路。',why:'开阔、可预期，减少“在巨大城市里做决定”的疲惫。',how:'南门—湖边—南门，按同一条路返回。',when:'清晨或傍晚，避开正午暴晒。',ev:'北京 6 篇：研究集中于感知偏好、安全感与停留/漫步行为。',tags:['开阔','可预期','步行']},
+ {id:'bj-yuyuantan',city:'北京',name:'玉渊潭公园',lat:39.918,lon:116.320,moods:['tired','low'],times:[30,60],senses:['water','shade'],companions:['elder','family'],body:'沿东湖走半圈，遇到长椅就坐 10 分钟。',why:'平路多、长椅多，可停留比可进入更重要。',how:'东门进，沿湖走到樱花园，再原路返回。',when:'清晨，湖面还有雾的时候。',ev:'北京 6 篇：研究集中于感知偏好、满意度、安全感与停留/漫步行为。',tags:['平路','长椅','湖景']},
+ {id:'bj-ditan',city:'北京',name:'地坛公园',lat:39.952,lon:116.410,moods:['low','tired'],times:[30],senses:['shade'],companions:['solo','elder'],body:'沿方泽坛外墙走一圈，在银杏下坐一会儿。',why:'封闭、安静、树冠连续，适合把注意力收回来。',how:'南门进，逆时针绕坛一圈，不赶路。',when:'下午四点后，旅行团散去。',ev:'北京 6 篇：感知偏好、安全感与停留行为是北京绿地情绪收益的关键线索。',tags:['安静','银杏','围墙内']},
+ {id:'nj-xuanwu',city:'南京',name:'玄武湖环湖步道',lat:32.070,lon:118.795,moods:['tense','restless'],times:[30,60],senses:['water','open'],companions:['solo','family'],body:'从玄武门进，沿湖走 3 公里，只走一段。',why:'水面开阔，城市天际线退到对岸，适合“把脑子放空”。',how:'玄武门—解放门，走 30 分钟就折返。',when:'傍晚，城墙灯刚亮的时候。',ev:'南京 1 篇：设计良好的小型绿地同样能取得可比的恢复效应。',tags:['湖面','城墙','折返']},
+ {id:'nj-pocket',city:'南京',name:'鼓楼公园',lat:32.061,lon:118.780,moods:['tense','tired'],times:[10],senses:['shade'],companions:['solo','elder'],body:'午休去最近的口袋公园，坐 8 分钟，只观察树叶。',why:'小尺度、设计良好的口袋公园，恢复效应可与社区公园可比。',how:'不带耳机，找一张长椅，数三种不同的叶形。',when:'午休或下班后，天还亮着。',ev:'南京 1 篇：设计良好的口袋公园可取得与社区公园可比的恢复效应。',tags:['10 分钟','楼下','低门槛']},
+ {id:'hz-gushan',city:'杭州',name:'西湖孤山',lat:30.253,lon:120.145,moods:['low','restless'],times:[60],senses:['water','birds'],companions:['solo'],body:'从西泠桥走到孤山后山，临水坐 10 分钟。',why:'更高的生物多样性更受偏好，而偏好与心理恢复、审美价值相关。',how:'避开断桥主线，走北侧小路，找一段临水石阶。',when:'清晨，旅行团还没到。',ev:'杭州 2 篇：生物多样性偏好与心理恢复、审美价值感知相关。',tags:['生物多样性','临水','慢走']},
+ {id:'hz-yanggong',city:'杭州',name:'杨公堤',lat:30.244,lon:120.130,moods:['tired','low'],times:[30,60],senses:['shade','water'],companions:['solo','family'],body:'沿杨公堤走，水一直在左边，走到茅家埠就停。',why:'树冠连续、游客较少，适合不设目的的慢走。',how:'郭庄—茅家埠，40 分钟，坐一段再返回。',when:'工作日傍晚。',ev:'杭州 2 篇：生物多样性偏好与心理恢复、审美价值感知相关。',tags:['树荫','水岸','人少']},
+ {id:'fz-fudao',city:'福州',name:'福道',lat:26.075,lon:119.270,moods:['tired','restless'],times:[60],senses:['shade','open'],companions:['solo','family'],body:'傍晚从 3 号口上，走到第一个观景台就折返。',why:'心理与生理响应高度一致，山地步道让“看城市”变成“穿过树冠”。',how:'不冲全程，30–40 分钟折返，留一点体力。',when:'傍晚，树冠里还有余光。',ev:'福州 3 篇：心理与生理响应高度一致（R<0.8）。',tags:['树冠','登高','折返']},
+ {id:'fz-xihu',city:'福州',name:'福州西湖公园',lat:26.090,lon:119.290,moods:['low','tired'],times:[30],senses:['water','shade'],companions:['elder','family'],body:'沿湖走半圈，在树荫下坐一会儿，看看水。',why:'平缓、可停留，适合陪长辈慢慢走。',how:'正门进，沿湖走到博物馆一侧就返回。',when:'上午，光线柔和的时候。',ev:'福州 3 篇：心理与生理响应高度一致（R<0.8）。',tags:['平路','湖景','长椅']},
+ {id:'wh-donghu',city:'武汉',name:'东湖听涛景区',lat:30.560,lon:114.360,moods:['restless','tired'],times:[30,60],senses:['birds','water'],companions:['solo'],body:'清晨沿湖走 15 分钟，停下来数三种鸟鸣。',why:'感知鸟多样性与感知恢复性正相关，心理恢复经感知恢复性间接作用。',how:'不戴耳机，找一处临水台阶站定 3 分钟。',when:'工作日清晨，跑步的人比游客多。',ev:'武汉 2 篇：感知鸟多样性与感知恢复性正相关，心理恢复为间接作用。',tags:['鸟鸣','湖边','独处']},
+ {id:'xm-yundang',city:'厦门',name:'筼筜湖',lat:24.480,lon:118.090,moods:['tense','low'],times:[30,60],senses:['water','shade'],companions:['solo','elder'],body:'绕湖半圈，在树荫下坐 10 分钟。',why:'物理感知是满意度基础，审美与心理认知直接影响满意度。',how:'走半圈就停，不追求“环湖完成”。',when:'上午，光线柔和时。',ev:'厦门 1 篇：物理感知是满意度基础，审美与心理认知直接影响满意度。',tags:['湖景','树荫','半圈']},
+ {id:'xa-huancheng',city:'西安',name:'环城公园',lat:34.260,lon:108.945,moods:['tired','tense'],times:[30],senses:['shade'],companions:['elder','solo'],body:'找一段乔、灌、草三层都有的段落，坐 15 分钟。',why:'乔—灌—草复合林地在心理恢复各维度最优，结构越复杂，恢复质量越高。',how:'不沿城墙走全程，只挑一段有层次的绿地停下。',when:'傍晚，城墙灯刚亮的时候。',ev:'西安 3 篇：乔—灌—草复合林地心理恢复最优；步行显著促进生理恢复。',tags:['复层结构','城墙','坐观']},
+ {id:'cd-roof',city:'成都',name:'太古里屋顶花园',lat:30.654,lon:104.082,moods:['low','tired'],times:[30],senses:['open','shade'],companions:['solo','family'],body:'找一处观赏型屋顶花园，坐着看植物层次，不运动。',why:'观赏型屋顶花园感知恢复性均值最高，运动型最低。',how:'选有层次、有花境的屋顶，不选器材区。',when:'阴天或小雨，室内也能“进自然”。',ev:'成都 2 篇：观赏型屋顶花园感知恢复性均值最高，运动型最低。',tags:['屋顶','观赏','雨天']},
+ {id:'cc-nanhu',city:'长春',name:'南湖公园',lat:43.860,lon:125.330,moods:['tired','low'],times:[30,60],senses:['water','shade'],companions:['solo','family'],body:'绕湖半圈，在树荫下快走 20 分钟。',why:'绿地暴露后工作记忆与情绪表达改善，先恢复，再专注。',how:'不背单词、不回消息，只数经过的桥。',when:'午后最容易卡住的那一段时间。',ev:'长春 3 篇：绿地暴露后数字广度提升、情绪表达改善。',tags:['恢复专注','湖风','快走']},
+ {id:'ber-canal',city:'柏林',name:'兰德维尔运河步道',lat:52.500,lon:13.410,moods:['tense','restless'],times:[30],senses:['water','shade'],companions:['solo'],body:'沿运河走一站地铁的距离，不听播客。',why:'高频使用运河植被步道者皮质醇更低、生活满意度更高。',how:'从一站走到下一站，水一直在右手边。',when:'通勤路上，把“换乘”改成“走一段”。',ev:'柏林 3 篇：常用运河植被步道者皮质醇显著更低、生活满意度更高。',tags:['水声','通勤','可重复']},
+ {id:'ber-tempel',city:'柏林',name:'滕珀尔霍夫公园',lat:52.473,lon:13.402,moods:['restless','low'],times:[60],senses:['open'],companions:['family','solo'],body:'沿旧跑道走一大圈，风大，视野一直开着。',why:'前机场改造的大尺度开放空间，边界清楚、视野开阔。',how:'从主入口进，沿跑道走到尽头再折返。',when:'周末上午，人还不算多。',ev:'柏林 3 篇：运河植被步道使用与皮质醇降低、生活满意度更高相关。',tags:['开阔','旧机场','放空']},
+ {id:'edi-meadows',city:'爱丁堡',name:'The Meadows',lat:55.942,lon:-3.190,moods:['low','tired'],times:[30],senses:['open','shade'],companions:['solo','family'],body:'找一张朝南的长椅，晒 15 分钟太阳。',why:'绿蓝空间访问与福祉获益相关；晴天先把“出门”这一步解决。',how:'带一本书，只读两页，剩下时间看云。',when:'晴天午后，阳光不刺眼的时候。',ev:'爱丁堡 3 篇：绿蓝空间访问与福祉获益相关；EVI 每增加 1，后续 CMD 治疗几率更低（AOR 0.80）。',tags:['阳光','草地','长椅']},
+ {id:'edi-princes',city:'爱丁堡',name:'王子街花园',lat:55.951,lon:-3.200,moods:['low','tired'],times:[30],senses:['shade','open'],companions:['elder','family'],body:'坐在花园里看城堡，走两步就能喝杯茶。',why:'位于城市日常动线上，不需要专门“出游”，适合陪长辈。',how:'从东侧入口进，沿花园走到城堡观景位。',when:'午后，光线斜过来的时候。',ev:'爱丁堡 3 篇：绿蓝空间访问与福祉获益相关。',tags:['城堡','长椅','日常动线']},
+ {id:'edi-arthur',city:'爱丁堡',name:'亚瑟王座',lat:55.944,lon:-3.160,moods:['restless','tense'],times:[60],senses:['open'],companions:['solo'],body:'从 Holyrood 侧上，走到第一处平台就停。',why:'登高带来的“尺度切换”，是旅人最快的情绪重置。',how:'不冲山顶，45 分钟到平台，风大就返回。',when:'晴天，风不算大的时候。',ev:'爱丁堡 3 篇：绿蓝空间访问与福祉获益相关。',tags:['登高','风','尺度切换']},
+ {id:'opo-duoro',city:'波尔图',name:'杜罗河滨',lat:41.140,lon:-8.620,moods:['low','restless'],times:[60],senses:['water','open'],companions:['solo'],body:'日落前 40 分钟，坐河阶上看灯一盏盏亮。',why:'邻近城市绿地与较低抑郁几率相关；河阶提供“有陪伴感的独处”。',how:'不赶景点，带一瓶水，坐到天色变蓝。',when:'日落前 40 分钟到天刚黑。',ev:'波尔图 3 篇：邻近城市绿地与较低抑郁 odds 相关（OR=0.21）。',tags:['日落','河阶','独处']}
+];
+
+const MOODS = [
+ {id:'tense',label:'紧绷',sub:'脑子停不下来'},
+ {id:'tired',label:'疲惫',sub:'睡够了还是累'},
+ {id:'low',label:'低落',sub:'提不起劲'},
+ {id:'restless',label:'烦躁',sub:'坐不住、想走'}
+];
+const SENSES = [
+ {id:'shade',label:'树荫',sub:'被树冠罩住'},
+ {id:'water',label:'水声',sub:'江、湖、运河'},
+ {id:'birds',label:'鸟鸣',sub:'听见别的生命'},
+ {id:'open',label:'开阔',sub:'看得远一点'}
+];
+const COMPANIONS = [
+ {id:'solo',label:'一个人',sub:'不用社交'},
+ {id:'family',label:'带孩子',sub:'要能跑'},
+ {id:'elder',label:'陪长辈',sub:'平路多'}
+];
+
+/* ============================================================ 状态 */
+const state = {
+  step:1, city:null, located:false, origin:null,
+  mood:null, time:30, sense:'shade', companion:'solo',
+  selectedId:null, altOffset:1, fav:[], locatedKm:null
+};
+try{
+  const f=JSON.parse(localStorage.getItem('natureRxFav')||'[]');
+  if(Array.isArray(f)) state.fav=f;
+}catch(e){}
+
+const $=(s,el=document)=>el.querySelector(s);
+const $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const cityByName=n=>CITIES.find(c=>c.name===n);
+const placeById=id=>PLACES.find(p=>p.id===id);
+
+function haversine(a,b,c,d){
+  const R=6371, rad=x=>x*Math.PI/180;
+  const dLat=rad(c-a), dLon=rad(d-b);
+  const q=Math.sin(dLat/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(q));
+}
+function fmtKm(km){ return km<1?Math.round(km*1000)+' m':km.toFixed(1)+' km'; }
+function travelMinutes(km){
+  if(km<=2) return Math.max(4,Math.round(km*13));
+  if(km<=6) return Math.max(5,Math.round(km*5));
+  return Math.max(8,Math.round(km*2.6));
+}
+function travel(km){
+  if(km<=2) return '步行约 '+travelMinutes(km)+' 分钟';
+  if(km<=6) return '骑行约 '+travelMinutes(km)+' 分钟';
+  return '地铁/驾车约 '+travelMinutes(km)+' 分钟';
+}
+
+function cityOrigin(){
+  const c=cityByName(state.city)||CITIES[0];
+  return state.origin||{lat:c.lat,lon:c.lon};
+}
+function rank(){
+  const o=cityOrigin();
+  const pool=PLACES.filter(p=>p.city===state.city);
+  const scored=pool.map(p=>{
+    let tier=0;
+    if(state.mood&&p.moods.includes(state.mood)) tier+=4;
+    if(p.senses.includes(state.sense)) tier+=2;
+    if(p.times.includes(state.time)) tier+=1;
+    if(p.companions.includes(state.companion)) tier+=1;
+    return {...p, km:haversine(o.lat,o.lon,p.lat,p.lon), tier};
+  });
+  // 交通时间不应吞掉全部可用时间：先排可行项，再把其余作为备选
+  const feasible=scored.filter(p=>travelMinutes(p.km)<=Math.max(8,state.time*0.6));
+  if(!feasible.length) return scored.sort((a,b)=>a.km-b.km);
+  const fset=new Set(feasible.map(p=>p.id));
+  return scored.sort((a,b)=>{
+    const af=fset.has(a.id),bf=fset.has(b.id);
+    if(af!==bf) return af?-1:1;
+    return b.tier-a.tier || a.km-b.km;
+  });
+}
+
+/* ============================================================ 图标 */
+function icon(name,size=24){
+  if(name==='shade') name='tree'; if(name==='birds') name='bird';
+  const s=`width="${size}" height="${size}"`;
+  const map={
+    pin:`<svg ${s} viewBox="0 0 20 20" fill="none"><path d="M10 18s6-5 6-10a6 6 0 1 0-12 0c0 5 6 10 6 10Z" stroke="currentColor" stroke-width="1.4"/><circle cx="10" cy="8" r="2.2" stroke="currentColor" stroke-width="1.3"/></svg>`,
+    crosshair:`<svg ${s} viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M10 1v4M10 15v4M1 10h4M15 10h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+    arrow:`<svg ${s} viewBox="0 0 20 20" fill="none"><path d="M3 10h13M11 5l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    chev:`<svg ${s} viewBox="0 0 20 20" fill="none"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    heart:`<svg ${s} viewBox="0 0 20 20" fill="none"><path d="M10 16.5S3 12.4 3 7.8C3 5.5 4.7 4 6.6 4c1.4 0 2.7.7 3.4 1.8C10.7 4.7 12 4 13.4 4 15.3 4 17 5.5 17 7.8c0 4.6-7 8.7-7 8.7Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>`,
+    tree:`<svg ${s} viewBox="0 0 20 20" fill="none"><path d="M4 12a6 6 0 0 1 12 0H4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 12v6M7.5 18h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+    water:`<svg ${s} viewBox="0 0 20 20" fill="none"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 2-2 4 0M2 16c2-2 4-2 6 0s4 2 6 0 2-2 4 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+    bird:`<svg ${s} viewBox="0 0 20 20" fill="none"><path d="M2 12c3 0 4-4 8-4 3 0 4 3 7 3M12 11l2 6M7 12l1 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    open:`<svg ${s} viewBox="0 0 20 20" fill="none"><path d="M2 14h16M5 14V9M15 14V7M2 17h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="5" r="2" stroke="currentColor" stroke-width="1.3"/></svg>`,
+    safety:`<svg ${s} viewBox="0 0 20 20" fill="none"><path d="M10 2 4 4.5v5c0 4 3 6.5 6 8 3-1.5 6-4 6-8v-5L10 2Z" stroke="currentColor" stroke-width="1.3"/></svg>`,
+    clock:`<svg ${s} viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`
+  };
+  return map[name]||'';
+}
+function moodIcon(id){
+  const a='fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"';
+  if(id==='tense') return `<svg viewBox="0 0 24 24" ${a}><path d="M4 8c4-3 6 3 10 0s6 3 6 0"/><path d="M4 15c4-3 6 3 10 0s6 3 6 0"/><path d="M8 4v16"/></svg>`;
+  if(id==='tired') return `<svg viewBox="0 0 24 24" ${a}><rect x="3" y="7" width="16" height="10" rx="3"/><path d="M21 10v4"/><path d="M6 12h4"/></svg>`;
+  if(id==='low') return `<svg viewBox="0 0 24 24" ${a}><path d="M5 16a4 4 0 0 1 1-8 5 5 0 0 1 9-1 4 4 0 0 1 4 9"/><path d="M8 19l-1 2M13 19l-1 2M18 19l-1 2"/></svg>`;
+  return `<svg viewBox="0 0 24 24" ${a}><path d="M3 9h5l3-5 4 12 3-5h4"/></svg>`;
+}
+
+/* ============================================================ 视图 1：位置 */
+function viewLocation(){
+  const cityCount = state.city ? PLACES.filter(p=>p.city===state.city).length : 0;
+  return `
+    <p class="kicker">Step 01 · 位置</p>
+    <h2>先告诉我，<br>你在哪里。</h2>
+    <p class="sub">定位只用于找到离你最近的自然场景，不上传、不追踪。</p>
+
+    <div class="loc-card">
+      <svg class="loc-map" viewBox="0 0 356 158" fill="none" preserveAspectRatio="none">
+        <path d="M-20 120C40 70 90 60 150 78s110 42 160 8 70-40 110-30" stroke="#F6F1E5" stroke-opacity=".22"/>
+        <path d="M-10 140C50 95 100 86 160 102s110 40 160 6 70-34 110-24" stroke="#F6F1E5" stroke-opacity=".18"/>
+        <path d="M-20 70C40 30 100 22 160 38s100 36 150 12 60-22 100-14" stroke="#F6F1E5" stroke-opacity=".14"/>
+        <circle cx="286" cy="46" r="3" fill="#E7C9A4" opacity=".8"/>
+        <circle cx="286" cy="46" r="9" stroke="#E7C9A4" stroke-opacity=".4"/>
+        <circle cx="62" cy="110" r="2.4" fill="#E7C9A4" opacity=".6"/>
+      </svg>
+      <div class="loc-content">
+        <div class="loc-top"><span class="loc-dot"></span>${state.located?'已定位 · 最近覆盖城市':'当前位置'}</div>
+        <div class="loc-city">${state.city||'尚未定位'}</div>
+        <div class="loc-note">${state.located
+          ? (state.locatedKm!==null?`距你约 ${fmtKm(state.locatedKm)}，已匹配最近的试点城市`:'已读取当前位置')
+          : (state.city?'以城市中心为起点估算距离':'开启定位，或手动选一座城市')}</div>
+        <button class="loc-btn" data-locate>${icon('crosshair',14)}<span>${state.located?'重新定位':'使用当前位置'}</span></button>
+      </div>
+    </div>
+
+    <div class="divider">或手动选择城市</div>
+    <div class="city-grid">
+      ${CITIES.map(c=>{
+        const n=PLACES.filter(p=>p.city===c.name).length;
+        return `<button class="city ${state.city===c.name?'on':''}" data-city="${c.name}"><b>${c.name}</b><span>${n} 处场景</span></button>`;
+      }).join('')}
+      <div class="city soon"><b>更多城市</b><span>逐步开放</span></div>
+    </div>
+    <p class="privacy">${icon('safety',12)}<span>定位只在本地计算，不上传位置。<br>预览版覆盖 ${CITIES.length} 座试点城市、${PLACES.length} 处自然场景。<br>场景为真实地点或示意点，推荐不等同论文研究地。</span></p>
+    <p class="credit"><span>开发与来源</span>中国矿业大学 / 中科院生态环境研究所 · 陈珊珊</p>
+  `;
+}
+
+/* ============================================================ 视图 2：情绪与偏好 */
+function viewMood(){
+  return `
+    <p class="kicker">Step 02 · 状态</p>
+    <h2>此刻，你想被<br>什么接住？</h2>
+    <p class="sub">没有标准答案。选你现在的状态，我们再决定走多远、去哪里。</p>
+
+    <div class="field">
+      <div class="field-label"><b>情绪状态</b><span>State</span><em>单选</em></div>
+      <div class="moods">
+        ${MOODS.map(m=>`<button class="mood ${state.mood===m.id?'on':''}" data-mood="${m.id}" aria-pressed="${state.mood===m.id}">${moodIcon(m.id)}<div><b>${m.label}</b><span>${m.sub}</span></div></button>`).join('')}
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><b>能拿出多久</b><span>Time</span><em>单选</em></div>
+      <div class="pills">
+        ${[10,30,60].map(t=>`<button class="pill ${state.time===t?'on':''}" data-time="${t}"><b>${t} 分钟</b><span>${t===10?'楼下转一圈':t===30?'一个午休':'值得走一趟'}</span></button>`).join('')}
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><b>想要的自然</b><span>Sense</span><em>单选</em></div>
+      <div class="senses">
+        ${SENSES.map(s=>`<button class="sense ${state.sense===s.id?'on':''}" data-sense="${s.id}">${icon(s.id,18)}<b>${s.label}</b><span>${s.sub}</span></button>`).join('')}
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><b>和谁一起</b><span>Company</span><em>单选</em></div>
+      <div class="pills">
+        ${COMPANIONS.map(c=>`<button class="pill ${state.companion===c.id?'on':''}" data-comp="${c.id}"><b>${c.label}</b><span>${c.sub}</span></button>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================ 视图 3：结果 */
+function matchTags(p){
+  const tags=[];
+  if(state.mood&&p.moods.includes(state.mood)) tags.push('情绪匹配');
+  if(p.senses.includes(state.sense)) tags.push(SENSES.find(s=>s.id===state.sense).label);
+  if(p.times.includes(state.time)) tags.push(state.time+' 分钟安排');
+  if(p.companions.includes(state.companion)) tags.push(COMPANIONS.find(c=>c.id===state.companion).label);
+  return tags.slice(0,3);
+}
+function routeSvg(p){
+  return `<svg viewBox="0 0 320 52" fill="none" preserveAspectRatio="none">
+    <path d="M12 38C60 38 60 14 118 14s58 24 108 24 56-14 82-14" stroke="#2C4839" stroke-opacity=".35" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <circle cx="12" cy="38" r="4" fill="#7A202C"/>
+    <circle cx="12" cy="38" r="8" stroke="#7A202C" stroke-opacity=".25"/>
+    <circle cx="308" cy="24" r="5" fill="#2C4839"/>
+    <path d="M308 19v-7M305 24h6" stroke="#2C4839" stroke-width="1.2" stroke-linecap="round"/>
+    <text x="20" y="49" font-size="8" fill="#7C7B6C" font-family="Noto Sans SC">你</text>
+    <text x="266" y="49" font-size="8" fill="#7C7B6C" font-family="Noto Sans SC">这里</text>
+  </svg>`;
+}
+
+function viewResult(){
+  const list=rank();
+  if(!list.length) return '<p class="sub">这座城市还没有录入场景。</p>';
+  let main=list.find(p=>p.id===state.selectedId)||list[0];
+  const others=list.filter(p=>p.id!==main.id).slice(0,2);
+  const fav=state.fav.includes(main.id);
+
+  return `
+    <p class="kicker">Step 03 · 处方</p>
+    <div class="res-head">
+      <h2>离你最近的一处<br>合适自然</h2>
+      <div class="res-count">按匹配度<br>与距离排序<br><b style="color:var(--wine)">${list.length} 处可选</b>${others.length?'<br><span class="scrollhint">下滑查看备选</span>':''}</div>
+    </div>
+    <div class="reason">${matchTags(main).map(t=>`<span>${t}</span>`).join('')}</div>
+    ${(()=>{
+      if(!state.mood||main.moods.includes(state.mood)) return '';
+      const o=cityOrigin();
+      const moodPlaces=PLACES.filter(p=>p.city===state.city&&p.moods.includes(state.mood))
+        .map(p=>({...p,km:haversine(o.lat,o.lon,p.lat,p.lon)}))
+        .sort((a,b)=>a.km-b.km);
+      const label=MOODS.find(m=>m.id===state.mood).label;
+      if(moodPlaces.length){
+        const b=moodPlaces[0];
+        return `<p class="fallback">完全匹配的「${b.name}」加上路程约需 ${travelMinutes(b.km)+10} 分钟，超出你选的 ${state.time} 分钟；先给你最近的一处。</p>`;
+      }
+      return `<p class="fallback">这座城暂无匹配“${label}”的场景，先按距离与偏好给出最近的一处。</p>`;
+    })()}
+
+    <article class="rx">
+      <div class="rx-top"><span>Nature Prescription · ${main.city}</span>
+        <button class="heart ${fav?'on':''}" data-fav="${main.id}" aria-label="收藏">${icon('heart',15)}</button>
+      </div>
+      <div class="rx-city"><h3>${main.name}</h3><em>${main.city}</em></div>
+      <div class="rx-place">${icon('pin',12)}${main.city} · 距你 ${fmtKm(main.km)}</div>
+      <div class="distrow"><b>${fmtKm(main.km)}</b><span>${travel(main.km)}</span><i>${main.km<1?'很近':'可到达'}</i></div>
+      <p class="rx-body">${main.body}</p>
+      <div class="rows">
+        <div class="row"><span>为什么</span><p>${main.why}</p></div>
+        <div class="row"><span>怎么走</span><p>${main.how}</p></div>
+        <div class="row"><span>什么时候</span><p>${main.when}</p></div>
+      </div>
+      <div class="route">${routeSvg(main)}
+        <div class="route-cap"><span>起点</span><span>直线距离示意</span><span>坐下 10 分钟</span></div>
+      </div>
+      <p class="evidence"><b>文献线索｜</b>${main.ev}</p>
+    </article>
+
+    ${others.length?`<div class="alt-title">还可以去<span>按距离与匹配度</span></div>
+    ${others.map((p,i)=>`<button class="alt" data-alt="${p.id}">
+      <span class="alt-idx">0${i+2}</span>
+      <span class="alt-main"><b>${p.name}</b><span>${p.city} · ${travel(p.km)} · ${matchTags(p).join(' / ')||'就近选择'}</span></span>
+      <span class="alt-km">${fmtKm(p.km)}</span>
+      ${icon('chev',12)}
+    </button>`).join('')}`:''}
+
+    <p class="privacy" style="margin-top:12px">${icon('safety',12)}<span>距离为直线估算（以${state.located?'你的定位':'城市中心'}为起点）；路线为示意，导航请以地图应用为准。</span></p>
+  `;
+}
+
+/* ============================================================ CTA / 头部 */
+function ctaHTML(){
+  if(state.step===1){
+    return `<button class="cta" data-next="2" ${state.city?'':'disabled'}>${state.city?'下一步 · 选择情绪':'先选择一座城市'}${icon('arrow',15)}</button>`;
+  }
+  if(state.step===2){
+    return `<button class="cta" data-next="3" ${state.mood?'':'disabled'}>${state.mood?'看看最近的处方':'先选一个情绪状态'}${icon('arrow',15)}</button>`;
+  }
+  const list=rank();
+  const main=list.find(p=>p.id===state.selectedId)||list[0];
+  return `<button class="cta" data-nav>开始导航 · ${fmtKm(main.km)}${icon('arrow',15)}</button><div class="cta-sub">${travel(main.km)} · 路线为示意</div>`;
+}
+
+let lastStep=0;
+function render(){
+  const view=$('#view');
+  const scroll=view.scrollTop;
+  view.innerHTML = state.step===1?viewLocation():state.step===2?viewMood():viewResult();
+  $('#cta').innerHTML=ctaHTML();
+  $$('#progress i').forEach((el,i)=>el.classList.toggle('on',i<state.step));
+  $('#backBtn').classList.toggle('hidden',state.step===1);
+  $('#favCount').textContent=state.fav.length;
+  $('#favTop').style.display=state.step===3?'flex':'none';
+  if(lastStep!==state.step){ view.scrollTop=0; lastStep=state.step; }else{ view.scrollTop=scroll; }
+}
+
+/* ============================================================ 交互 */
+function toast(msg){
+  const t=$('#toast');t.textContent=msg;t.classList.add('on');
+  clearTimeout(toast._tm);toast._tm=setTimeout(()=>t.classList.remove('on'),1800);
+}
+
+function locate(){
+  if(!navigator.geolocation){ toast('此设备不支持定位，请手动选择城市'); return; }
+  const btn=$('[data-locate]');
+  if(btn) btn.querySelector('span').textContent='定位中…';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude:lat,longitude:lon}=pos.coords;
+    let best=CITIES[0],bd=Infinity;
+    CITIES.forEach(c=>{const d=haversine(lat,lon,c.lat,c.lon);if(d<bd){bd=d;best=c}});
+    state.origin={lat,lon}; state.city=best.name; state.located=true; state.locatedKm=bd;
+    state.selectedId=null;
+    render();
+    if(bd>150) toast(`附近暂未覆盖，已选最近试点：${best.name}`);
+  },()=>{
+    toast('定位未开启，请手动选择城市');
+    render();
+  },{enableHighAccuracy:false,timeout:8000,maximumAge:300000});
+}
+
+function toggleFav(id){
+  const i=state.fav.indexOf(id);
+  if(i>=0){state.fav.splice(i,1);toast('已取消收藏');}
+  else{state.fav.push(id);toast('已收藏这处自然');}
+  try{localStorage.setItem('natureRxFav',JSON.stringify(state.fav))}catch(e){}
+  render();
+}
+
+function openSheet(){
+  const list=rank();
+  const main=list.find(p=>p.id===state.selectedId)||list[0];
+  if(!main) return;
+  $('#sheetAddr').textContent=`${main.city} · ${main.name}`;
+  $('#sheetSteps').innerHTML=`
+    <li><b>01</b><span>从你的位置出发，直线约 ${fmtKm(main.km)}；${travel(main.km)}</span></li>
+    <li><b>02</b><span>${main.how}</span></li>
+    <li><b>03</b><span>到达后找一处能坐下的位置，待 10–15 分钟，尽量不看手机。</span></li>`;
+  const isCN=['上海','北京','南京','杭州','福州','武汉','厦门','西安','成都','长春'].includes(main.city);
+  $('#mapLink').href=isCN
+    ? `https://uri.amap.com/marker?position=${main.lon},${main.lat}&name=${encodeURIComponent(main.name)}`
+    : `https://www.google.com/maps/search/?api=1&query=${main.lat},${main.lon}`;
+  $('#sheet').classList.add('on');
+}
+function closeSheet(){$('#sheet').classList.remove('on')}
+
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.closest('[data-close-sheet]')||t.closest('.sheet-bg')){ closeSheet(); return; }
+  if(t.closest('[data-locate]')){ locate(); return; }
+
+  const city=t.closest('[data-city]');
+  if(city){
+    state.city=city.dataset.city; state.origin=null; state.located=false; state.locatedKm=null; state.selectedId=null;
+    render(); return;
+  }
+  const mood=t.closest('[data-mood]');
+  if(mood){ state.mood=mood.dataset.mood; state.selectedId=null; render(); return; }
+  const tm=t.closest('[data-time]');
+  if(tm){ state.time=Number(tm.dataset.time); state.selectedId=null; render(); return; }
+  const sn=t.closest('[data-sense]');
+  if(sn){ state.sense=sn.dataset.sense; state.selectedId=null; render(); return; }
+  const cp=t.closest('[data-comp]');
+  if(cp){ state.companion=cp.dataset.comp; state.selectedId=null; render(); return; }
+
+  const nx=t.closest('[data-next]');
+  if(nx){ state.step=Number(nx.dataset.next); render(); return; }
+  if(t.closest('#backBtn')){ state.step=Math.max(1,state.step-1); render(); return; }
+
+  const fav=t.closest('[data-fav]');
+  if(fav){ toggleFav(fav.dataset.fav); return; }
+  const alt=t.closest('[data-alt]');
+  if(alt){ state.selectedId=alt.dataset.alt; render(); return; }
+  if(t.closest('[data-nav]')){ openSheet(); return; }
+  if(t.closest('#favTop')){
+    const main=placeById(state.selectedId)||rank()[0];
+    if(main) toggleFav(main.id);
+    return;
+  }
+});
+
+render();
+</script>
+</body>
+</html>
